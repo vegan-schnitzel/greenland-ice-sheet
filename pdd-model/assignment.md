@@ -15,13 +15,21 @@ Remember that your final fields should have a daily resolution, i.e., a time axi
 1) Calculate the surface mass balance based on these fields. This is again separated into a) accumulation, the precipitation that falls at temperatures below 0 degC, and b) ablation, using the PDD method. The total surface mass balance is then SMB = ACC + ABL.
 
 ### ToDo:
+- add contours to input pdd fields and/or elevation contours?
+- when outputing mean values, ocean isn't masked?
 - find lapse rate value from literature
 - implement sanity checks
-- create an ocean mask by using elevation data
-- seasonality of precipitation?
-- write parameters of modul in section at the beginning of the code
-- plot proper maps with coastlines
-- use np.flip instead of origin=lower, so longitude is first dimension
-- What about the units?
+- seasonality of precipitation? & fine-tune input fields!
+- What about the units of pdd / melting factor?
+- How to combine results of several simulations? Save data as npy?
 
 In the end we get a map of greenland with mass balances during one year.
+
+
+### Feedback:
+Very nice with the table of effects!
+The first three figures are not made by your code I think. Please cite clearly where they are from. 
+
+Your SMB seems to be on a reasonable scale - that is good. It's a bit hard to see whether there is any melting at all, maybe try to plot the ocean in another color. It looks like it's very dominated by the latitudinal gradient, perhaps try to increase the effect of altitude as well. 
+
+-- Also, is the latitudinal gradient the wrong way around? We would expect more precip in the south, but warmer temperatures. I think this is all solvable by a little tweaking of parameters here and there :)

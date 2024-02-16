@@ -1,2 +1,3 @@
-era5/
-model_input/
+__pycache__
+*.nc
+grl*.npy
