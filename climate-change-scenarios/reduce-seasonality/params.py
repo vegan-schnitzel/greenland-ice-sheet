@@ -20,7 +20,7 @@ T_LATITUDE_DIFF = 15.0
 
 # seasonal cycle
 # absolute summer-winter difference
-T_SEASONAL_DIFF = 20.0
+T_SEASONAL_DIFF = 2.0
 
 ##############################
 # PRECIPITATION FIELD [mm/day]

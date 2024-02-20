@@ -1,3 +1,5 @@
 __pycache__
 *.nc
-grl*.npy
+*.npy
+plotting_tips_Greenland.ipynb
+climate-change-scenarios/*/pdd-model.py

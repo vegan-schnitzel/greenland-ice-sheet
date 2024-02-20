@@ -1,0 +1,22 @@
+MODEL PARAMETERS
+> model dimension: (82, 140, 365) (lon, lat, day)
+Temperature [°C]
+> initial value = 3.0
+> weather scaling = 3.5
+> lapse rate = 0.65
+> latitudinal difference = 15.0
+> seasonal difference = 2.0
+Precipitation [mm/day]
+> initial value = 7.0
+> latitudinal difference = 6.0
+> distance weight = 0.1 
+
+TEMPERATURE FIELD
+> mean annual temperature: -9.98 °C
+
+PRECIPITATION FIELD
+> mean annual precipitation: 2.3957494565748654 mm d-1
+
+SURFACE MASS BALANCE
+> pdd factor = 5.0
+> mean surface mass balance = 724.565707604928 [mm yr-1]

@@ -1,4 +1,3 @@
-# %%
 #####################################
 # Positive Degree Day Glacier Model #
 # Robert Wright                     #
@@ -21,8 +20,6 @@ import params as p
 grl  = np.transpose(np.load('../model-input/grl20_surface.npy'))
 xlon = np.transpose(np.load('../model-input/grl20_lon.npy'))
 ylat = np.transpose(np.load('../model-input/grl20_lat.npy'))
-#plt.imshow(grl20,cmap='bwr',origin='lower',vmin=-200,vmax=3000)
-#plt.colorbar()
 
 trans = ccrs.PlateCarree()
 proj = ccrs.Stereographic(central_latitude=90, central_longitude=316)
@@ -35,7 +32,8 @@ shpfilename = shpreader.natural_earth(resolution='50m',
 # read shapefile
 shpfile = shpreader.Reader(shpfilename)
 # select greenland only
-greenland = [country.geometry for country in shpfile.records() if country.attributes["NAME_LONG"] == "Greenland"]
+greenland = [country.geometry for country in shpfile.records() \
+             if country.attributes["NAME_LONG"] == "Greenland"]
 
 # mask ocean (all elevation values below 0)
 seamask = np.ones(np.shape(grl), dtype=bool)
@@ -45,26 +43,29 @@ seamask[grl > 0] = False
 # set minimum elevation to 0 (no negative values)
 elev = np.where(grl>0, grl, 0)
 # get dimensions of elevation file & add time axis in days
-dim = np.shape(elev) + (365,)
+dim = np.shape(grl) + (365,)
 
 ### MODEL SETUP ###
 print("MODEL PARAMETERS")
 print("> model dimension:", dim, "(lon, lat, day)")
 print("Temperature [°C]")
+print("> initial value =", p.T_INITIAL)
 print("> weather scaling =", p.T_WEATHER_SCALE)
 print("> lapse rate =", p.LAPSE_RATE)
 print("> latitudinal difference =", p.T_LATITUDE_DIFF)
 print("> seasonal difference =", p.T_SEASONAL_DIFF)
 print("Precipitation [mm/day]")
-print("> latitudinal difference =", p.PR_LATITUDE_DIFF, '\n')
+print("> initial value =", p.PR_INITIAL)
+print("> latitudinal difference =", p.PR_LATITUDE_DIFF)
+print("> distance weight =", p.PR_COASTLINE, '\n')
 
-
+#######################################
 ### CREATE TEMPERATURE FIELD t with ###
 # a) latitudinal gradient
 #    south-north absolute difference: 15°C (era5)
 # b) decrease with elevation
 #    elevation lapse rate: 0.7K/100m (literature)
-# c) a seasonal cycle 
+# c) a seasonal cycle
 #    winter-summer difference: 20K (era5)
 # d) some randomness to represent weather
 #    normal distribution, sigma = 3.5K (era5)
@@ -72,13 +73,14 @@ print("> latitudinal difference =", p.PR_LATITUDE_DIFF, '\n')
 
 # for now, choose filling value to reach appropriate
 # mean annual temperature
-t = np.full(dim, p.T_INITIAL)
+t = np.full(dim, p.T_INITIAL, dtype=float)
 
 def weather(x, scale=p.T_WEATHER_SCALE):
     """
     add randomness (weather) to temperature by drawing
     values from normal distribution
     """
+    np.random.seed(42)
     # (scale = standard deviation)
     w = np.random.normal(loc=0, scale=scale, size=dim)
     x = x + w
@@ -100,8 +102,8 @@ def latitude(x, diff=p.T_LATITUDE_DIFF):
     # loop over days
     for tday in range(dim[2]):
         # loop over latitudes
-        for yylat in range(dim[1]):
-            x[:,yylat,tday] = x[:,yylat,tday] - (yylat/dim[1] * diff)
+        for jlat in range(dim[1]):
+            x[:,jlat,tday] = x[:,jlat,tday] - (diff * (jlat+1)/dim[1])
     return x
 
 def season(x, diff=p.T_SEASONAL_DIFF):
@@ -125,9 +127,8 @@ print("> mean annual temperature:",np.round(np.mean(tfinal),2),'°C\n')
 # compute temporal mean (i.e., throughout full year)
 tfinal_tmean = np.mean(tfinal, axis=2)
 
-def plot_greenland(field, title, figpath,
-                   cmesh_kw=dict(cmap='viridis'),
-                   cbar_kw=dict()):
+def plot_greenland(field, title, figpath, cbar_ticks=None,
+                   cmesh_kw=dict(cmap='viridis'), cbar_kw=dict()):
     """
     general routine to plot greenland maps
     """
@@ -138,12 +139,17 @@ def plot_greenland(field, title, figpath,
     cm = ax.pcolormesh(xlon, ylat, plotme, shading='nearest',
                        transform=trans, **cmesh_kw)
     cb = fig.colorbar(cm, **cbar_kw)
+    # optionally, adjust colorbar ticks
+    if cbar_ticks is not None:
+        cb.set_ticks(cbar_ticks)
+
     ax.set_title(title)
+    # add greenland coastline
     ax.add_geometries(greenland, crs=trans, fc='none',
                       ec='k', alpha=0.8)
     ax.gridlines(alpha=.6, ls='--', lw=.5)
     fig.savefig(figpath, dpi=300, bbox_inches="tight")
-    plt.show()
+    plt.draw()
 
 # plot temperature field
 plot_greenland(tfinal_tmean,
@@ -153,17 +159,50 @@ plot_greenland(tfinal_tmean,
                figpath="figs/pdd-temperature-field.png")
 
 
+##########################################
 ### CREATE PRECIPITATION FIELD pr with ###
 # a) latitudinal gradient
 #    south-north absolute difference: 4 mm d-1 (era5)
 # b) mean annual precipitation: pr_mean = 1.6 mm d-1 (era5)
+# c) distance from coastline
 #
-# The scaling parameters are slightly adjusted in the following...
+# (scaling parameters are slightly adjusted in the following...)
+
+# compute (euclidian) distance from coastline, save result as computation
+# takes some time
+def compute_distance_coastline():
+    # transform coastline into boolean array, where 1 represents coastline
+    # height limits are arbitrary and related to chosen resolution
+    coastline = np.where((grl<250) & (grl>-50), 1, 0)
+    distance = np.zeros_like(coastline)
+    for ilon in range(dim[0]):
+        for jlat in range(dim[1]):
+            # can't compute distance to coastline for points on coastline
+            if coastline[ilon,jlat] == 0:
+                # use euclidian distance as metric
+                distance[ilon,jlat] = np.min([np.sqrt((ilon - x)**2 + (jlat - y)**2) \
+                                              for x in range(dim[0]) for y in range(dim[1]) \
+                                              if coastline[x, y] == 1])
+    plot_greenland(distance,
+                   title="distance to coastline",
+                   cbar_kw=dict(label="euclidian distance [grid points]"),
+                   figpath="../model-input/distance-coastline.png")
+    np.save('../model-input/distance-coastline', distance)
+
+if False:
+    compute_distance_coastline()
+
+def apply_distance_coastline(x, scale=p.PR_COASTLINE):
+    # import distance to coastline
+    distance = np.load('../model-input/distance-coastline.npy')
+    # loop over all days
+    for tday in range(dim[2]):
+        x[:,:,tday] = x[:,:,tday] / (scale * distance + 1)
+    return x
 
 # create precipitation field analogous to temperature field
-
-pr = np.full(dim, p.PR_INITIAL)
-prfinal = latitude(pr, diff=p.PR_LATITUDE_DIFF)
+pr = np.full(dim, p.PR_INITIAL, dtype=float)
+prfinal = apply_distance_coastline(latitude(pr, diff=p.PR_LATITUDE_DIFF))
 
 # CONTROL PRECIPITATION FIELD
 print("PRECIPITATION FIELD")
@@ -172,7 +211,7 @@ print("> mean annual precipitation:",np.mean(prfinal),'mm d-1\n')
 # compute temporal mean (i.e., throughout full year)
 prfinal_tmean = np.mean(prfinal, axis=2)
 
-plot_greenland(prfinal_tmean,
+plot_greenland(prfinal[:,:,5],
                title="PDD: Input precipitation field",
                cmesh_kw=dict(cmap="Blues"),
                cbar_kw=dict(label=r"pr [mm d$^{-1}$]"),
@@ -184,7 +223,7 @@ plot_greenland(prfinal_tmean,
 #    & melting factor beta
 # 2. Compute accumulation ACC by summing up precipitation
 #    at temperatures below 0°C
-# 3. SMB = ACC - ABL 
+# 3. SMB = ACC - ABL
 
 # no time domain, hence:
 smb_dim = np.shape(elev)
@@ -210,25 +249,34 @@ for xxlon in range(dim[0]):
         # sum up precipitation (if t<0) per grid cell
         acc[xxlon,yylat] = np.sum(a = prfinal[xxlon,yylat,:],
                                   where = tfinal[xxlon,yylat,:]<0)
-        
+
 # control plot
 #fig, ax = plt.subplots()
 #im = ax.imshow(np.transpose(acc), origin='lower')
 #cb = fig.colorbar(im, label='ACC [mm d-1]')
 
+# surface mass balance by subtracting ablation from accumulation
 smb = acc - abl
 # FIXME: I guess the units are [mm yr-1] now, but why?
 
 print("SURFACE MASS BALANCE")
 print("> pdd factor =", p.BETA)
-print("> mean surface mass balance =",np.mean(smb),"[mm yr-1]")
+print("> mean surface mass balance =",
+      # masking ocean (!)
+      np.mean(np.ma.masked_where(seamask, smb)),
+      "[mm yr-1]")
 
 plot_greenland(field=smb,
                title="PDD: Surface mass balance",
                figpath="figs/pdd-smb.png",
                cmesh_kw=dict(cmap='RdBu',
-                             norm=colors.TwoSlopeNorm(vcenter=0,vmin=-5000)),
-               cbar_kw=dict(extend='min',
-                            label=r"smb [mm yr$^{-1}$]"))
+                             # use two slopes, but no absolute vmin/vmax
+                             norm=colors.TwoSlopeNorm(vcenter=0)),
+               cbar_kw=dict(label=r"smb [mm yr$^{-1}$]"))
 
-# %%
+#cbar_ticks=[-5000, -4000, -3000, -2000, -1000, 0, 200, 400, 600, 800, 1000]
+
+# export surface mass balance for further analysis
+np.save('smb', smb)
+
+plt.show()

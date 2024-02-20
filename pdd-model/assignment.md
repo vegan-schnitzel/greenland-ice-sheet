@@ -16,10 +16,9 @@ Remember that your final fields should have a daily resolution, i.e., a time axi
 
 ### ToDo:
 - add contours to input pdd fields and/or elevation contours?
-- when outputing mean values, ocean isn't masked?
-- find lapse rate value from literature
+- when outputing mean values, ocean isn't masked!
 - implement sanity checks
-- seasonality of precipitation? & fine-tune input fields!
+- seasonality of precipitation?
 - What about the units of pdd / melting factor?
 - How to combine results of several simulations? Save data as npy?
 
