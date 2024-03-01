@@ -6,5 +6,5 @@ One of these different climates should represent a glacial climate (colder, drye
 Let's do a 1) glacial climate and 2) reduce seasonality.
 
 ### ToDo:
-- can namelist be read without copying model?
-- not copy-pasting mean surface mass balance
+- [ ] can namelist be read without copying model?
+- [ ] not copy-pasting mean surface mass balance
