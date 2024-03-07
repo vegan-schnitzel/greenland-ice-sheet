@@ -1,4 +1,6 @@
-dx = 5.025125628140704
+dx = 5.03 m
+dt = 1 yr
+
 Courant number 53.5 > 1 at t=319 and n=125; ice speed=268.8m/yr
 Courant number 17.7 > 1 at t=320 and n=125; ice speed=88.8m/yr
 Courant number 8.8 > 1 at t=321 and n=125; ice speed=44.3m/yr
