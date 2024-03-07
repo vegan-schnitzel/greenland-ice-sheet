@@ -1,7 +1,7 @@
 #####################
 # 1D Ice Flow Model #
 # Robert Wright     #
-# 02/2024           #
+# 03/2024           #
 #####################
 
 import numpy as np
@@ -9,16 +9,19 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set_theme(style='ticks', color_codes=True)
 
-# set model parameters
-L = 1000                  # domain size
-nx = 200                  # number of grid points
-x = np.linspace(0, L, nx) # spatial dimension
-dx = L / (nx - 1)         # distance between grid points [m]
-print("dx =", dx, "m")
+# change time step and grid spacing by factor
+mag = 1
 
-nt = 400 # number of time steps
-dt = 1   # time step [yr]
-print("dt =", dt, "yr")
+# set model parameters
+L = 400000 / mag        # length of domain [m]
+nx = 100                  # number of grid points
+x = np.linspace(0, L, nx) # grid point locations [m]
+dx = L / (nx - 1)         # grid spacing [m]
+print("dx =", np.round(dx/1e3,2), "km")
+
+nt = 25000   # number of time steps
+dt = 1 / mag # time step [yr]
+print("dt =", dt, "yr\n")
 
 # set simulation parameters
 A   = 1e-20    # flow parameter [s^-1 Pa^-3]
@@ -30,7 +33,7 @@ g   = 9.81     # gravitational acceleration [m s^-2]
 def init_smb(x, half_range=L/8):
     # use step function
     condition = np.logical_and(x >= L/2-half_range, x <= L/2+half_range)
-    return np.where(condition, .01, -.01) # ! smb is changed
+    return np.where(condition, .1, -.1) # ! smb lowered by factor 10
 
 #plt.plot(x, init_smb(x), label="smb")
 
@@ -75,7 +78,7 @@ for t in range(0,nt-1):
         speed[t,n] = (Fp[n]+Fm[n])/2 / h[t,n] if h[t,n] != 0 else 0
         # calculate Courant number
         C = dt / dx * speed[t,n]
-        if C > 1:
+        if np.absolute(C) > 1:
             print(f"Courant number {np.round(C,1)} > 1 at t={t} and n={n}; ice speed={np.round(speed[t,n],1)}m/yr")
         
         # update height
@@ -86,9 +89,9 @@ for t in range(0,nt-1):
 fig, ax = plt.subplots()
 step_size = nt // 5  # calculate step size to get 10 data points
 for yr in range(0, nt, step_size):
-    ax.plot(x, h[yr,:], label=f"t={np.round(yr*dt,1)}yr")
+    ax.plot(x/1e3, h[yr,:], label=f"t={np.round(yr*dt,1)}yr")
 ax.legend()
-ax.set_xlabel("x [m]")
+ax.set_xlabel("x [km]")
 ax.set_ylabel("ice thickness [m]")
 ax.set_title("1D Ice Flow Model")
 fig.savefig("figs/1d-ice-flow.png", dpi=300, bbox_inches='tight')

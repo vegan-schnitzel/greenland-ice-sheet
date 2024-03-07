@@ -13,9 +13,11 @@ In our ice flux equations, we have the parameter A, which there has been some co
   - later, use zonal mean or something else of Greenland
 - set initial height to 0
 - animate frames with several years difference
+- ice flow starts to be important for large ice thickness, hence, after some simulation time
+- large gradients in ice thickness lead to faster ice speed and higher courant numbers
 
 ### ToDo
 - [x] figure out cfl criteria
 - [ ] create animation of results with matplotlib
-- [ ] even if SMB is low and flow parameter in right change, almost no ice transport visible
+- [ ] what value to choose for flow parameter?
 
