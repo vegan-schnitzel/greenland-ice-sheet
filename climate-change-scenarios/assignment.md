@@ -7,4 +7,4 @@ Let's do a 1) glacial climate and 2) reduce seasonality.
 
 ### ToDo:
 - [ ] can namelist be read without copying model?
-- [ ] not copy-pasting mean surface mass balance
+- [ ] not copy-pasting mean surface mass balance & model input!

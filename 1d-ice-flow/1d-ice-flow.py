@@ -13,7 +13,7 @@ sns.set_theme(style='ticks', color_codes=True)
 mag = 1
 
 # set model parameters
-L = 400000 / mag        # length of domain [m]
+L = 400000 / mag          # length of domain [m]
 nx = 100                  # number of grid points
 x = np.linspace(0, L, nx) # grid point locations [m]
 dx = L / (nx - 1)         # grid spacing [m]

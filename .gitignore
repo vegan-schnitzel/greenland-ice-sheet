@@ -1,5 +1,8 @@
 __pycache__
 *.nc
 *.npy
+*.npz
 plotting_tips_Greenland.ipynb
+climate_forcing_example.py
 climate-change-scenarios/*/pdd-model.py
+literature/*.pdf

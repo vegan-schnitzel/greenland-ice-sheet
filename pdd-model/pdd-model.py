@@ -19,6 +19,7 @@ import params as p
 # "switch" dimensions to x = lon & y = lat
 grl  = np.transpose(np.load('../model-input/grl20_surface.npy'))
 xlon = np.transpose(np.load('../model-input/grl20_lon.npy'))
+#xlon = np.loadtxt('../model-input/grl40_lon.csv')
 ylat = np.transpose(np.load('../model-input/grl20_lat.npy'))
 
 trans = ccrs.PlateCarree()
@@ -187,14 +188,14 @@ def compute_distance_coastline():
                    title="distance to coastline",
                    cbar_kw=dict(label="euclidian distance [grid points]"),
                    figpath="../model-input/distance-coastline.png")
-    np.save('../model-input/distance-coastline', distance)
+    np.save('../model-input/distance_coastline_grl20', distance)
 
 if False:
     compute_distance_coastline()
 
 def apply_distance_coastline(x, scale=p.PR_COASTLINE):
     # import distance to coastline
-    distance = np.load('../model-input/distance-coastline.npy')
+    distance = np.load('../model-input/distance_coastline_grl20.npy')
     # loop over all days
     for tday in range(dim[2]):
         x[:,:,tday] = x[:,:,tday] / (scale * distance + 1)

@@ -1,0 +1,22 @@
+MODEL PARAMETERS:
+> dimensions = 41, 70 (x, y)
+> dx, dy = 40.0, 40.0 km
+> dt = 1 yr
+> nt = 25000 
+
+SURFACE MASS BALANCE:
+Temperature [°C]
+> initial value = 3.0
+> weather scaling = 3.5
+> lapse rate = 0.65
+> latitudinal difference = 15.0
+> seasonal difference = 20.0
+Precipitation [mm/day]
+> initial value = 7.0
+> latitudinal difference = 6.0
+> distance weight = 0.1 
+
+Model results saved!
+
+runtime = 2:57:36.029794
+

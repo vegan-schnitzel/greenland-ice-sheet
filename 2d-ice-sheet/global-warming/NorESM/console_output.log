@@ -1,0 +1,14 @@
+2D Greenland Ice Sheet Model
+Simulation path: global-warming/NorESM
+2024-06-07 18:32:40.817273
+
+MODEL PARAMETERS:
+> dimensions = 41, 70 (x, y)
+> dx, dy = 40.0, 40.0 km
+> dt = 1 yr
+> nt = 1000
+
+Model results saved!
+
+runtime = 0:01:43.043290
+
