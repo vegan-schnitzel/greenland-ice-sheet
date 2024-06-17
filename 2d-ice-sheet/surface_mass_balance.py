@@ -241,8 +241,8 @@ def compute_smb_NorESM(ERA5_t, ERA5_pr, NorESM_t, NorESM_pr, clim_index, year, b
 
     # apply bounds for smb
     # actually, this is not necessary, since temperature and precipitation fields are realistic
-    #smb[smb > 2] = 2
-    #smb[smb < -2] = -2
+    smb[smb > 2] = 2
+    smb[smb < -2] = -2
 
     return smb
 

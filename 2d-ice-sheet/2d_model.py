@@ -26,13 +26,13 @@ sns.set_theme(style='ticks', color_codes=True)
 np.random.seed(42)
 
 # simulation configuration
-#SIM_PATH = 'climate-anomalies/deltaT_deltaP/+12_8'
-SIM_PATH = sys.argv[1]
+SIM_PATH = 'global-warming/NorESM'
+#SIM_PATH = sys.argv[1]
 SAVE_RESULTS = True # save model results to npz file
 # set up smb (default: idealized smb)
 BENCHMARK = False # used for benchmark simulation with flat bedrock and
                   # constant surface mass balance
-REALISTIC_SMB = False # use realistic surface mass balance data computed from NorESM
+REALISTIC_SMB = True # use realistic surface mass balance data computed from NorESM
 
 ### SET UP MODEL ###############################################################
 def import_data():
@@ -61,8 +61,8 @@ def set_model_parameters(bedrock):
     dx = 40*1e3           # grid spacing [m]
     ny = bedrock.shape[1] # number of grid points in y-direction
     dy = dx           # grid spacing [m]
-    nt = 10000 # number of time steps
-    dt = 2     # time step [yr]
+    nt = 1000 # number of time steps
+    dt = 1     # time step [yr]
     if REALISTIC_SMB:
         dt = 1    # climate index is provided for each year
         nt = 1000 # run model for 1000 years
@@ -77,7 +77,7 @@ def output_model_parameters_to_logger(nx, ny, dx, dy, dt, nt, logger):
     logger.info("> dimensions = {}, {} (x, y)".format(nx, ny))
     logger.info("> dx, dy = {}, {} km".format(dx/1e3, dy/1e3))
     logger.info("> dt = {} yr".format(dt))
-    logger.info("> nt = {}\n".format(nt))
+    logger.info("> nt(*dt) = {}\n".format(nt*dt))
 
 def logging_setup():
     # Create a logger
@@ -268,14 +268,6 @@ def run_model(logger):
                                   * (.5 * (h[t,ix,iy+1]+h[t,ix,iy]))**5 \
                                   *60*60*24*365
                 
-                # calculate ice velocity (average fluxes divided by ice thickness)
-                # in x-direction
-                #u_x[t,ix,iy] = (Fpx[ix,iy]-Fmx[ix,iy]) / (2 * h[t,ix,iy])
-                # in y-direction
-                #u_y[t,ix,iy] = (Fpy[ix,iy]-Fmy[ix,iy]) / (2 * h[t,ix,iy])
-                # compute the absolute ice velocity
-                #u_abs[t,ix,iy] = np.sqrt(u_x[t,ix,iy]**2 + u_y[t,ix,iy]**2)
-                
                 # calculate ice thickness (can't be negative)
                 h[t+1,ix,iy] = max(0, h[t,ix,iy] - (Fpx[ix,iy]-Fmx[ix,iy])*(dt/dx) - (Fpy[ix,iy]-Fmy[ix,iy])*(dt/dy) + smb[t,ix,iy]*dt)
 
@@ -283,6 +275,7 @@ def run_model(logger):
                 z[t+1,ix,iy] = bedrock[ix,iy] + h[t+1,ix,iy]
 
         # add calving
+        # todo: z is updated in the loop, possibly could become positive within the ocean?
         h[z < 0] = 0
 
         # update maps with model results

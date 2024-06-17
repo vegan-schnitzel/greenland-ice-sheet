@@ -1,14 +1,15 @@
 \documentclass{scrartcl}
 
-\KOMAoption{toc}{bibliography}
 \KOMAoptions{
 	paper=a4,
 	fontsize=12pt,
 	parskip=true,
-	titlepage=true,
-	abstract=true,
-	%appendixprefix=true,
+	titlepage=false,
+	toc=bibliography,
+	%abstract=true,
 }
+%\KOMAoption{toc}{bibliography}
+
 \addtokomafont{disposition}{\boldmath}
 
 % section numbering
@@ -31,6 +32,7 @@
 \sisetup{%
 	separate-uncertainty=true,
 	locale=UK,
+	range-units=single,
 	%mode=match
 	%per-mode=fraction,
 }
@@ -52,17 +54,25 @@ pdfauthor={Robert Wright},
 }
 
 \usepackage{graphicx}
+	% Placing float (table or figure) at the top of the page in otherwise empty page
+	\makeatletter
+	\setlength\@fptop{0\p@}
+	\makeatother
 \usepackage[verbose]{wrapfig} % figure and text side-by-side
 \usepackage{float}
 \usepackage{pdfpages}
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{cleveref}
-\usepackage{booktabs, makecell}
+\usepackage{booktabs}
+\usepackage{tabularx} % automatic line breaks in tables
+	% redefine the X column to be based on a m-column instead of a p-column
+	\renewcommand\tabularxcolumn[1]{m{#1}} 
+\usepackage{multirow, makecell}
 \usepackage[roman]{parnotes}
 \usepackage[shortcuts]{extdash} % to hyphenate words with dashes in them
 \usepackage{xcolor}
-\usepackage[enable]{easy-todo}
+%\usepackage[enable]{easy-todo}
 \usepackage[version=4]{mhchem}
 
 % LANGUAGE & DATE
@@ -72,22 +82,24 @@ pdfauthor={Robert Wright},
 	\setdefaultlanguage[variant=british]{english}
 % load datetime2 after language is set
 % (can’t detect the region with polyglossia)
-\usepackage{datetime2}
+\usepackage[en-GB]{datetime2}
 	\DTMlangsetup[en-GB]{ord=raise}
 
 % REFERENCES
 \usepackage[
 	backend=biber,
-	style=numeric,
+	style=numeric-comp,
 	sorting=none,
 	%bibstyle=authortitle,
 	autolang=langname,
 	uniquename=init,
 	giveninits=true,
 	maxnames=2,
+	% sets the option for all dates to the same value
+	alldates=terse,
 	%block=ragged,
 ]{biblatex}
-%\addbibresource{../literature/cm1.bib}
+\addbibresource{../../literature/glaciology.bib}
 % don't print url and urldate
 %\AtEveryBibitem{
 %	\clearfield{url}
@@ -136,17 +148,18 @@ pdfauthor={Robert Wright},
 % TITLE
 
 \subject{GEOV325: Glaciology}
-\title{Folgefonna Field Report}
+\title{Simulating the Greenland Ice Sheet}
+\subtitle{Using a Two-Dimensional Ice Flow Model}
 \author{Robert Wright}
 \publishers{University of Bergen}
-\date{\DTMdisplaydate{2024}{5}{16}{-1}}
+\date{\DTMdisplaydate{2024}{6}{14}{-1}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
 	
 	\maketitle
-	%\tableofcontents 
+	\tableofcontents 
 	% https://tex.stackexchange.com/questions/341613/komascript-toc-prevent-column-break-between-sections-in-multicolumn-toc
 	
 	%\input{sections/abstract.tex}
@@ -159,11 +172,11 @@ pdfauthor={Robert Wright},
 	\begingroup
 	\hypersetup{urlcolor=.}
 	\setlength{\emergencystretch}{3em}
-	%\printbibliography
+	\printbibliography
 	\endgroup
 	
-	%\newpage
-	%\appendix
-	%\input{sections/appendix.tex}
+	\newpage
+	\appendix
+	\input{sections/appendix.tex}
 	
 \end{document}

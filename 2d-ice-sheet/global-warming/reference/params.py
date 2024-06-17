@@ -4,7 +4,7 @@ Define pdd model parameters.
 ##########################
 # TEMPERATURE FIELD [°C] #
 # initial temperature value
-T_INITIAL = 15.0
+T_INITIAL = 3.0
 
 # randomness due to weather
 # standard deviation of normal distribution
@@ -25,7 +25,7 @@ T_SEASONAL_DIFF = 20.0
 ##############################
 # PRECIPITATION FIELD [mm/day]
 # initial precipitation value
-PR_INITIAL = 9.0
+PR_INITIAL = 7.0
 
 # latitudinal gradient
 PR_LATITUDE_DIFF = 6.0

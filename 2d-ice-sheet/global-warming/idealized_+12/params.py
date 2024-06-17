@@ -4,7 +4,7 @@ Define pdd model parameters.
 ##########################
 # TEMPERATURE FIELD [°C] #
 # initial temperature value
-T_INITIAL = 13.0
+T_INITIAL = 15.0
 
 # randomness due to weather
 # standard deviation of normal distribution
