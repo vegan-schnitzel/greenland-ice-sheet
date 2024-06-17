@@ -8,6 +8,7 @@ climate-change-scenarios/*/pdd-model.py
 literature/*.pdf
 
 # tex files
+*.toc
 *.aux
 *.bbl
 *.bcf

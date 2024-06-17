@@ -7,3 +7,5 @@ solved in the main model part found in [`2d_model.py`](2d-ice-sheet/2d_model.py)
 computed and updated in the [`surface_mass_balance.py`](2d-ice-sheet/surface_mass_balance.py) file. The
 corresponding parameters for initializing the temperature and precipitation fields are stored
 in the `params.py` files in the respective subdirectories.
+
+Some analysis of the model's results can be found in the accompanying [report](2d-ice-sheet/report/main.pdf).
